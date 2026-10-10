@@ -1,6 +1,6 @@
 // dsound.dll proxy = ASI loader p/ Virtual Pool 4 (x64).
-// O jogo importa DSOUND.dll (ordinal 11 = DirectSoundCreate8).
-// Repassamos as 14 exportações p/ a dsound real e carregamos *.asi.
+// The game imports DSOUND.dll (ordinal 11 = DirectSoundCreate8).
+// passed on the 14 exports for the actual dsound and loaded *.asi.
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
@@ -62,7 +62,7 @@ static DWORD WINAPI loader_thread(LPVOID unused) {
                  (L && adir[L-1] == '\\') ? "" : "\\");
     }
     wlog("thread: inicio");
-    // resolve a dsound real (system32 = builtin do Wine/Windows)
+    // resolve a dsound real
     wchar_t sys[MAX_PATH];
     GetSystemDirectoryW(sys, MAX_PATH);
     wcscat(sys, L"\\dsound.dll");
