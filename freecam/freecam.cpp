@@ -1,30 +1,5 @@
-// freecam.asi v0.16 — free camera p/ Virtual Pool 4 Online (x64, D3D9)
-//
-// v0.13: Estagio A com pareamento FORCADO (pool de worlds, todos os pares)
-//        + mao (det) da view capturada — build_view() reproduz a V do jogo
-//        exatamente (recon=0) => K=I no sync, sem espelhamento. [DEFINITIVA]
-// v0.16: ORDEM REAL da vtable (header mingw d3d9.h, batendo em runtime):
-//        DrawPrimitive=81, DrawPrimitiveUP=83, DrawIndexedPrimitiveUP=84,
-//        SetVertexShaderConstantF=94 (93 = Get!). v0.14 morria lendo vertices
-//        invalidos do slot errado. Constantes V/P ZERADAS no 94 (caça à linha)
-//        + logs de draws com freecam ligado + filtro de exceção.
-//        SetTransform / DrawPrimitive(UP).
-//
-// O QUE MUDOU (v0.1 -> v0.3)
-//  v0.1: SetTransform(VIEW)  -> STview=0, o jogo NUNCA passa a vista por la.
-//  v0.2: D3DXMatrixLookAtLH  -> unico call site no exe e' um helper de direcao
-//        (eye=(0,0,0) at=(1,0,0)), nao e' a camera.
-//  v0.3: o jogo renderiza com D3DX Effects (D3DXCreateEffect). Agora:
-//        * hooka D3DXCreateEffect -> enumera TODOS os nomes de parametros
-//          do shader (loga em freecam.log: e' la que descobrimos qual e' a view)
-//        * hooka ID3DXEffect::SetMatrix/SetMatrixTranspose/SetValue e, com a
-//          freecam ligada, troca a matriz de vista pela nossa
-//        * deteccao automatica: nome contendo "view" (sem "proj"); override
-//          manual via freecam.ini  ViewParam=<nome>
-//
-// Teclas: F4 liga/desliga | WASD move | setas giram | Q/E sobe/desce | Shift rapido
-//
-// Freecam.ini (opcional, ao lado do .asi):
+// Freecam.ini (optional, next to the .asi): if works, it works
+// thanks to AI 
 //   [Freecam] ViewParam=matView   MoveSpeed=80
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -48,7 +23,7 @@ static void tlog(const char *fmt, ...) {
 }
 
 // ---------------------------------------------------------------- config
-static char  g_cfgViewParam[64] = "";   // vazio = autodetect por nome
+static char  g_cfgViewParam[64] = ""; 
 static float g_cfgSpeed = 80.0f;
 static void load_cfg(void) {
     GetPrivateProfileStringA("Freecam", "ViewParam", "", g_cfgViewParam, sizeof(g_cfgViewParam), g_iniPath);
@@ -56,8 +31,8 @@ static void load_cfg(void) {
     tlog("cfg: ViewParam='%s' speed=%.0f", g_cfgViewParam, g_cfgSpeed);
 }
 
-// v0.15: captura o crash (endereco + modulo + registradores) antes de morrer
-static int g_hookIn[5] = {0,0,0,0,0};   // ST DP DUP DIPUP VSF: 1=entrou, 2=chamou original
+// v0.15
+static int g_hookIn[5] = {0,0,0,0,0};   /
 static LONG WINAPI exc_filter(EXCEPTION_POINTERS *ep) {
     static volatile LONG inF = 0;
     if (InterlockedExchange(&inF, 1)) return EXCEPTION_CONTINUE_SEARCH;
@@ -89,18 +64,15 @@ static LONG WINAPI exc_filter(EXCEPTION_POINTERS *ep) {
 
 // ---------------------------------------------------------------- freecam state
 static bool  g_free = false;
-static int   g_ovr = 0;   // quantas vezes trocamos a matriz
-static bool  g_userMoved = false;   // usuario ja voou (congela g_detV) — v0.13
+static int   g_ovr = 0;   // How often do exchange the matri
+static bool  g_userMoved = false;   // user has already flown (freeze g_detV) — v0.13
 static float g_eye[3] = {46.0f, 120.0f, -80.0f};
 static float g_at[3]  = {46.0f, 60.0f, 20.0f};
-static float g_upv[3] = {0.0f, 1.0f, 0.0f};   // up real da camera do jogo (v0.12)
+static float g_upv[3] = {0.0f, 1.0f, 0.0f};   // real game camera up (v0.12)
 static float g_yaw = 0.0f, g_pitch = -0.35f;
 static DWORD g_lastMove = 0;
 
-// v0.13: mao (handedness) da view do jogo. build_view() sempre gera det=+1;
-// se a V derivada tem det=-1, a diferenca Vd^-1 * V' e' uma REFLEXAO -> cena
-// espelhada (caras invertidas, igual "invert faces" do Blender). g_detV faz
-// build_view() reproduzir a mesma mao -> K comeca em IDENTIDADE exata.
+// v0.13:
 static float g_detV = 1.0f;
 static float det3(const D3DMATRIX *m) {
     return m->_11*(m->_22*m->_33 - m->_23*m->_32)
@@ -115,7 +87,7 @@ static void dir_from_angles(float *d) {
     d[2] = cosf(g_yaw) * cp;
 }
 
-// view no formato D3D (linha = vetor, translacao na 4a linha) = D3DXMatrixLookAtLH
+// view in D3D format (line = vector, translation in 4th line) = D3DXMatrixLookAtLH
 static void build_view(D3DMATRIX *m, const float *eye, const float *at) {
     float zx = at[0] - eye[0], zy = at[1] - eye[1], zz = at[2] - eye[2];
     float l = sqrtf(zx * zx + zy * zy + zz * zz);
@@ -126,8 +98,7 @@ static void build_view(D3DMATRIX *m, const float *eye, const float *at) {
     float xz = ux * zy - uy * zx;
     float xl = sqrtf(xx * xx + xy * xy + xz * xz);
     if (xl < 1e-6f) { xx = 1; xy = 0; xz = 0; } else { xx /= xl; xy /= xl; xz /= xl; }
-    // v0.13: se a view do jogo tem det=-1, o eixo x = -(up x z) e y = x x z
-    // (linhas da V derivada ficam exatas -> recon=0 -> K=I no sync).
+    // v0.13:
     if (g_detV < 0) { xx = -xx; xy = -xy; xz = -xz; }
     float yx = zy * xz - zz * xy;          // z x x
     float yy = zz * xx - zx * xz;
@@ -160,15 +131,7 @@ static bool is_view_name(const char *n) {
 }
 
 // ================================================================
-// v0.4 — a cadeia de transformacao do jogo:
-//   P  = D3DXMatrixPerspectiveFovLH(...)        -> capturamos
-//   M  = D3DXMatrixMultiply(WV, P)  (por objeto) -> vemos
-//   upload: ID3DXEffect::SetMatrix("worldViewProj", M)
-// Correcao com freecam ligada:  M' = M * P^-1 * V^-1 * V' * P
-//   (assim M' = W * V' * P, qualquer que seja o W do objeto)
-// V (view do jogo) e' achada na cadeia: matriz ortonormal usada
-//   como operando muitas vezes por frame com VARIOS parceiros.
-// ================================================================
+// v0.4 — the game transformation chain
 #define ME(m,r,c) (((const float*)(m))[(r)*4+(c)])
 #define MW(m,r,c) (((float*)(m))[(r)*4+(c)])
 
@@ -204,33 +167,33 @@ static bool minv(const D3DMATRIX *in, D3DMATRIX *out) {
 
 static bool g_haveProj = false;
 static D3DMATRIX g_proj;
-static bool g_haveViewM = false;      // V adotada (view do jogo)
+static bool g_haveViewM = false;      // V adopted (game view)
 static D3DMATRIX g_viewM;
-static bool g_viewT = false;          // true = jogo usa convencao vetor-coluna (transposta)
-static float trans_len(const D3DMATRIX *m) {   // maior translacao (linha4 ou coluna4)
+static bool g_viewT = false;          // true = game uses vector-column convention (transposed)
+static float trans_len(const D3DMATRIX *m) {   
     float r = m->_41*m->_41 + m->_42*m->_42 + m->_43*m->_43;
     float c = m->_14*m->_14 + m->_24*m->_24 + m->_34*m->_34;
     return r > c ? r : c;
 }
-static bool is_col_conv(const D3DMATRIX *m) {  // traducao so na coluna4
+static bool is_col_conv(const D3DMATRIX *m) {  
     float r = m->_41*m->_41 + m->_42*m->_42 + m->_43*m->_43;
     float c = m->_14*m->_14 + m->_24*m->_24 + m->_34*m->_34;
     return c > r && c > 1.0f;
 }
 static D3DMATRIX g_K;                 // P^-1 V^-1 V' P  (cache)
-static int  g_Kver = -1, g_ver = 0;   // invalidacao do cache
+static int  g_Kver = -1, g_ver = 0;   
 static bool g_Kok = false;
 static int  g_nMul = 0, g_nPersp = 0, g_npB = 0, g_npA = 0;
 static D3DMATRIX g_projs[24]; static int g_nProjs = 0;   // projecoes distintas (persistente)
-static bool g_wvpDone = false;                           // ja logou a origem do WVP no frame
-static bool ortho3(const D3DMATRIX *m);                  // fwd (definido depois)
-// --- derivacao: M = W*V*P  =>  X = V*P = W^-1*M  =>  V = X*P^-1 (valida se orto) ---
+static bool g_wvpDone = false;                           
+static bool ortho3(const D3DMATRIX *m);                  
+//--- derivation: M = W*V*P => X = V*P = W^-1*M => V = X*P^-1 (valida if orto) ---
 static D3DMATRIX g_Vgame, g_Puse;    // view real do jogo + projecao usada
 static bool g_haveX = false, g_Kready = false;
 static bool g_convCol = false;       // uploads em convencao transposta
 static int  g_nWvp = 0, g_nDeriv = 0, g_Kapp = 0, g_nSeq = 0;
 static char g_seq[700] = "";         // sequencia de SetMatrix do frame
-// world por efeito (pairing)
+// world by effect (pairing)
 #define MAXE 24
 static void *g_wEff[MAXE]; static D3DMATRIX g_wMat[MAXE]; static int g_nWE = 0;
 // v0.13: pool de worlds distintos p/ pareamento forcado do Estagio A.
