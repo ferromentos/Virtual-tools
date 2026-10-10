@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VP4SceneDesc>
+  <RoomData>
+    <roomName>Garage</roomName>
+    <roomDisplayName>Garage</roomDisplayName>
+    <roomDesc>Your friendly neighborhood Garage where everyone is welcome - as long as you bring your own pizza!</roomDesc>
+    <tableName>Garage</tableName>
+    <roomBrightness r="-0.08" g="-0.08" b="-0.06"/>
+    <roomContrast>1.64</roomContrast>
+    <shadowAlpha>1.0</shadowAlpha>
+    <zoomLimit>245.0</zoomLimit>
+    <zoomFactor>15.0</zoomFactor>
+    <textureNameFloor>ConcreteFloor.tga</textureNameFloor>
+  </RoomData>
+  <TableLight>
+    <lightModel>LIGHTMODEL_2_LIGHT</lightModel>
+    <ambientTable r="0.35" g="0.35" b="0.3"/>
+    <ambientBalls r="0.25" g="0.25" b="0.23"/>
+    <diffuseTable r="0.55" g="0.55" b="0.55"/>
+    <diffuseBalls r="0.6" g="0.6" b="0.57"/>
+    <specularTable r="0.35" g="0.35" b="0.35"/>
+    <envBlendBallSpec>1.2</envBlendBallSpec>
+    <envBlendBallScale>1.6</envBlendBallScale>
+    <specMap>0</specMap>
+    <specCompute>1</specCompute>
+    <position x="0.0" y="0.0" z="60.0"/>
+    <length>20.0</length>
+    <attenuation r="1.0" g="0.045" b="0.000" a="61.0"/>
+  </TableLight>
+</VP4SceneDesc>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
