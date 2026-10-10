@@ -1,27 +1,4 @@
 // vp4limits.asi — Virtual Pool 4 Multiplayer (x64)
-// Remove o limite de 65.535 indices por submesh no carregamento de modelos.
-//
-// O pipeline de meshes (ssMeshDX::WriteMeshes) cria o index buffer de cada
-// submesh como D3DFMT_INDEX16 (0x65) e, se a contagem de indices >= 0xFFFF,
-// loga "Whut Whoa, mesh has too many vertices for this device = %d" e CLAMPA
-// a contagem para 0xFFFE — truncando o modelo (lixo visual / crash).
-//
-// O mesmo codigo ja possui o caminho completo D3DFMT_INDEX32 (0x66), porem
-// inalcancavel: depende de `cmpl $0xffff, 0x57b0(%rax)`, um campo que nunca
-// e escrito em lugar nenhum do exe (codigo morto).
-//
-// Patch (10 bytes em RVA 0x68BA12):
-//   ANTES:  cmpl $0xffff, 0x57b0(%rax)    ; 81 B8 B0 57 00 00 FF FF 00 00
-//   DEPOIS: cmpl $0xfffe, 0x48(%rbx)      ; 81 7B 48 FE FF 00 00
-//           nop; nop; nop                 ; 90 90 90
-// rbx = submesh atual; +0x48 = contagem de indices (o mesmo campo que o jogo
-// clampa). O `ja` subsequente (0F 87, RVA 0x68BA1F) passa a levar ao caminho
-// 32-bit para contagens > 65534 — exatamente os casos que o jogo truncava.
-// Todo conteudo original (<= 65534 indices) continua em 16 bits: zero mudanca.
-//
-// Build:
-//   x86_64-w64-mingw32-g++ -shared -O2 -o vp4limits.asi vp4limits.cpp \
-//       -lkernel32 -static-libgcc -static-libstdc++
 
 #include <windows.h>
 #include <stdio.h>
