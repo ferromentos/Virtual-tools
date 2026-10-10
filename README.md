@@ -12,7 +12,20 @@ Limit ajuster
 
 Tools for converting rooms using python (dust2 as a example) 
 
-Mods installation
+
+
+
+
+
+
+
+Mods installation:
+
+
+
+
+
+
 Drag and drop dsound, vp4limits.asi, freecam.asi into your game's folder
 
 
