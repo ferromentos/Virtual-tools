@@ -26,7 +26,7 @@ static void hexline(const char* tag, const BYTE* p, size_t n)
     LOG("%s%s\n", tag, buf);
 }
 
-// Aplica patch se os bytes originais conferirem; sempre restaura protecao.
+// Apply patch if the original bytes check; always restore protection.
 static bool patch_bytes(BYTE* addr, const BYTE* expect, const BYTE* repl,
                         size_t n, const char* name)
 {
@@ -62,7 +62,7 @@ static DWORD WINAPI init_thread(LPVOID)
     BYTE* base = (BYTE*)exe;
     LOG("exe base = %p\n", base);
 
-    // --- Patch principal: gate do formato do index buffer -------------------
+    // --- Main patch: gate of the index buffer format -------------------
     // cmpl $0xffff,0x57b0(%rax)  ->  cmpl $0xfffe,0x48(%rbx); nop;nop;nop
     static const BYTE kExpect[] = { 0x81, 0xB8, 0xB0, 0x57, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 };
     static const BYTE kRepl[]   = { 0x81, 0x7B, 0x48, 0xFE, 0xFF, 0x00, 0x00, 0x90, 0x90, 0x90 };
@@ -70,8 +70,8 @@ static DWORD WINAPI init_thread(LPVOID)
     bool ok = patch_bytes(site, kExpect, kRepl, sizeof kExpect,
                           "gate idx32 (>65534 indices => D3DFMT_INDEX32)");
 
-    // Sanidade: o `ja` (0F 87) logo apos deve apontar para o caminho 32-bit,
-    // que comeca com test %edx,%edx; mov $0x66,%r9d  (D3DFMT_INDEX32).
+    // Sanity: the `ja` (0F 87) right after should point to the 32-bit path,
+    // starting with test %edx,%edx; mov $0x66.%r9d (D3DFMT_INDEX32)
     LOG("pos-patch em %p: ", site);
     hexline("", site, 16);
     if (site[10] == 0x0F && site[11] == 0x87) {
@@ -93,7 +93,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID)
 {
     if (reason == DLL_PROCESS_ATTACH) {
         DisableThreadLibraryCalls(hModule);
-        // Fora do DllMain (padrao do loader): init em thread propria.
+        // Outside of DllMain (loader pattern): init in thread own.
         HANDLE h = CreateThread(nullptr, 0, init_thread, nullptr, 0, nullptr);
         if (h) CloseHandle(h);
     }
