@@ -49,6 +49,12 @@ WINEDLLOVERRIDES="dsound=n,b" %command%
 
 ## Converting your own room (quickstart)
 
+
+<img width="1755" height="657" alt="261010_19h13m55s_screenshot" src="https://github.com/user-attachments/assets/df8001f9-b323-41dd-9ff3-b51bebeb9f82" />
+
+
+
+
 Requirements: **Python 3** (stdlib only) and **ImageMagick** (`magick` in
 PATH). The converter reuses the stock texture names and flips UVs
 automatically — no game code is patched.
