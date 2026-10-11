@@ -112,7 +112,7 @@ troubleshooting and command reference): see **[TUTORIAL.md](TUTORIAL.en.md)**
 
 ## Safety
 
-- Visual-only: no physics/gameplay/tournament
+- Visual-only: no physics/gameplay changes
 - Keep backups of any `.ark` you replace — installing is just copying them
   back.
 - Use at your own risk. Not affiliated with Celeris.
