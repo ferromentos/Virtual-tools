@@ -84,7 +84,7 @@ python3 tools/daetool.py convert model_split.obj src/garage.dae --floor piso \
 ```
 
 **Full walkthrough** (with the Dust2 example, table-height rule,
-troubleshooting and command reference): see **[TUTORIAL.md](TUTORIAL.md)**
+troubleshooting and command reference): see **[TUTORIAL.en.md](TUTORIAL.md)**
 ([versão em português](TUTORIAL.pt.md)).
 
 ## How it works
