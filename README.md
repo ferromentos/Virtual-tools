@@ -14,7 +14,7 @@ replace.
 | [`dsound.dll`](dsound.dll) | ASI loader (proxy DLL, drop into the game folder) |
 | [`version.dll`](version.dll) | Alternative ASI loader (use this if `dsound.dll` conflicts with audio) |
 | [`freecam/`](freecam) | Free camera mod (`freecam.asi` + source) |
-| [`vp4limits.asi`](vp4limits.asi) | Raises engine limits (big custom scenery stays visible) |
+| [`vp4limits.asi`](vp4limits.asi) | Raises engine limits (may freeze or crash the game when using a custom room if not installed) |
 | [`tools/daetool.py`](tools/daetool.py) | Converts OBJ → VP4 room mesh (`.dae`) + game textures (`.tga`) |
 | [`tools/arktool.py`](tools/arktool.py) | Extracts/packs game `.ark` packages |
 | [`tools/lightmap_bake.py`](tools/lightmap_bake.py) | Optional: bakes an AO lightmap for a room (headless Blender) |
