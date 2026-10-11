@@ -19,6 +19,8 @@ replace.
 | [`tools/arktool.py`](tools/arktool.py) | Extracts/packs game `.ark` packages |
 | [`tools/lightmap_bake.py`](tools/lightmap_bake.py) | Optional: bakes an AO lightmap for a room (headless Blender) |
 | [`dust2_src/`](dust2_src) | Example: the converted Dust2 (CS) room, ready to pack |
+| [`table ref/`](table_ref_jogo.obj) | Table reference for modeling |
+
 
 ## Installation (mods)
 
