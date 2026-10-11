@@ -41,7 +41,7 @@ WINEDLLOVERRIDES="dsound=n,b" %command%
 ### Freecam usage
 
 - **F4** — toggle the free camera
-- **W A S D** — move · **Q** / **E** — down / up
+- **W A S D** — move · **Q** / **E** — down / up / **R** / — reset position 
 
 ## Converting your own room (quickstart)
 
